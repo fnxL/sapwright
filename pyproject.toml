@@ -1,0 +1,62 @@
+[project]
+name = "sapwright"
+version = "0.0.1"
+description = "Python framework for SAP GUI Scripting/Automation"
+readme = "README.md"
+authors = [{ name = "fnxL", email = "ajaykanki.2e@gmail.com" }]
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+dependencies = ["pydantic>=2.13.5", "pywin32>=312; sys_platform=='win32'"]
+keywords = [
+    "sap",
+    "sap automation",
+    "sap gui",
+    "sapwright",
+    "sap wright",
+    "sap gui automation",
+    "sap gui scripting",
+    "sap gui scripting api",
+    "sap gui api",
+    "sap scripting automation",
+    "sap scripting",
+    "enterprise automation",
+]
+classifiers = [
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+[project.urls]
+Changelog = "https://github.com/fnxL/sapwright/releases"
+Homepage = "https://github.com/fnxL/sapwright"
+
+[build-system]
+requires = ["uv_build>=0.12.11,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+linting = ["ruff>=0.16.8"]
+tests = ["coverage>=7.16.0", "pytest>=9.1.1"]
+type-check = ["basedpyright>=1.40.1"]
+dev = [
+    { include-group = "linting" },
+    { include-group = "tests" },
+    { include-group = "type-check" },
+]
+
+[tool.basedpyright]
+include = ["src", "tests"]
+exclude = [
+    "**/__pycache__",
+    "src/experimental",
+]
+reportMissingTypeStubs = false
