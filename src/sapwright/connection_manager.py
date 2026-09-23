@@ -3,6 +3,7 @@ from typing import Any
 
 from sapwright._utils import get_scripting_engine
 from sapwright.exceptions import SAPConnectionError, SAPLogonError, SAPScriptingDisabled
+from sapwright.objects import GuiSession
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +75,7 @@ class ConnectionManager:
     def open_connection(
         connection_string: str | None = None,
         connection_name: str | None = None,
-    ) -> Any:
+    ) -> GuiSession:
         """Open a new connection and return its first session.
 
         connection_string takes precedence over connection_name.
@@ -97,7 +98,7 @@ class ConnectionManager:
                 )
             else:
                 connection = application.OpenConnection(connection_name, True, True)
-            return connection.Children(0)
+            return GuiSession(connection.Children(0))
         except Exception as e:
             msg = f"Failed to open SAP connection: {e}"
             logger.error(msg)
