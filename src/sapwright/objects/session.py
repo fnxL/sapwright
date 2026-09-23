@@ -3,7 +3,11 @@ from typing import Literal, overload
 
 from typing_extensions import override
 
-from sapwright.exceptions import SAPElementNotFound, SAPTransactionError
+from sapwright.exceptions import (
+    SAPElementNotFound,
+    SAPStatusBarError,
+    SAPTransactionError,
+)
 from sapwright.models import SessionInfo, StatusBarMsg
 from sapwright.objects.component import GuiComponent
 from sapwright.types import GuiComponentType, VKey
@@ -311,3 +315,24 @@ class GuiSession(GuiComponent):
             has_longtext=sbar.MessageHasLongText,
             is_popup=sbar.MessageAsPopup,
         )
+
+    def raise_for_status(
+        self,
+        message: str | None = None,
+        exception: type[Exception] = SAPStatusBarError,
+    ) -> StatusBarMsg:
+        """Checks the status bar for error message type and raises the given exception
+
+        Parameters
+        ----------
+        message : str | None, optional
+            Optional message to prepend to the error message, by default None
+        exception : type[Exception], optional
+            The exception object to raise, by default SAPStatusBarError
+        """
+        sbar = self.statusbar_msg()
+        if sbar.type != "E":
+            return sbar
+
+        error_message = f"{message}: {sbar.text}" if message else sbar.text
+        raise exception(error_message)
