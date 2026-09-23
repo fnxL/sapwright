@@ -6,7 +6,12 @@ readme = "README.md"
 authors = [{ name = "fnxL", email = "ajaykanki.2e@gmail.com" }]
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
-dependencies = ["pydantic>=2.13.5", "pywin32>=312; sys_platform=='win32'"]
+dependencies = [
+    "psutil>=7.2.2",
+    "pydantic>=2.13.5",
+    "pywinauto>=0.6.9",
+    "pywin32>=312; sys_platform=='win32'",
+]
 keywords = [
     "sap",
     "sap automation",
@@ -53,10 +58,12 @@ dev = [
     { include-group = "type-check" },
 ]
 
+[tool.ruff.lint]
+ignore = ["BLE001"]
+
 [tool.basedpyright]
 include = ["src", "tests"]
-exclude = [
-    "**/__pycache__",
-    "src/experimental",
-]
+exclude = ["**/__pycache__", "src/experimental"]
 reportMissingTypeStubs = false
+reportUnknownMemberType = false
+reportAny = false
