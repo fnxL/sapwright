@@ -68,3 +68,4 @@ reportMissingTypeStubs = false
 reportUnknownMemberType = false
 reportAny = false
 reportExplicitAny = false
+reportUnannotatedClassAttribute = false
