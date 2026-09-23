@@ -101,7 +101,7 @@ class GuiComponent:
         return self.get_text()
 
     @text.setter
-    def text(self, value: str):
+    def text(self, value: Any):
         _ = self.set_text(value, raise_error=True)
 
     def set_text(
