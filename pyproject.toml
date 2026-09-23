@@ -62,8 +62,8 @@ dev = [
 ignore = ["BLE001"]
 
 [tool.basedpyright]
-include = ["src", "tests"]
-exclude = ["**/__pycache__", "src/experimental"]
+include = ["src"]
+ignore = ["**/__pycache__", "src/experimental", "tests"]
 reportMissingTypeStubs = false
 reportUnknownMemberType = false
 reportAny = false
