@@ -2,8 +2,11 @@ import logging
 import sys
 import winreg
 from pathlib import Path
+from typing import Any
 
 import psutil
+import pywintypes
+import win32com.client as win32
 from pywinauto import Application
 from pywinauto.timings import TimeoutError as PywinautoTimeoutError
 
@@ -114,3 +117,12 @@ def get_saplogon_path() -> Path | None:
             return path
 
     return None
+
+
+def get_scripting_engine() -> Any | None:
+    """Returns the SAP GUI scripting engine, or None if SAP Logon is not running."""
+    try:
+        rot_entry = win32.GetObject("SAPGUI")
+    except pywintypes.com_error:
+        return None
+    return rot_entry.GetScriptingEngine
