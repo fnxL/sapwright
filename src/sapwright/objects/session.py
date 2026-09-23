@@ -1,4 +1,5 @@
 import logging
+from typing import Literal, overload
 
 from typing_extensions import override
 
@@ -119,6 +120,19 @@ class GuiSession(GuiComponent):
             raise ValueError("test_tool_mode must be 0 or 1")
         self._com.TestToolMode = value
 
+    @overload
+    def find_by_id(
+        self, id: str, raise_error: Literal[True] = True
+    ) -> GuiComponent: ...
+
+    @overload
+    def find_by_id(
+        self, id: str, raise_error: Literal[False]
+    ) -> GuiComponent | None: ...
+
+    @overload
+    def find_by_id(self, id: str, raise_error: bool) -> GuiComponent | None: ...
+
     def find_by_id(self, id: str, raise_error: bool = True) -> GuiComponent | None:
         element = self._com.findById(id, False)  # False = don't raise error
         if element is None:
@@ -129,7 +143,13 @@ class GuiSession(GuiComponent):
 
         return GuiComponent(element)
 
-    def findById(self, id: str, raise_error: bool = True):
+    @overload
+    def findById(self, id: str, raise_error: Literal[True] = True) -> GuiComponent: ...
+
+    @overload
+    def findById(self, id: str, raise_error: Literal[False]) -> GuiComponent | None: ...
+
+    def findById(self, id: str, raise_error: bool = True) -> GuiComponent | None:
         """Alias for find_by_id"""
         return self.find_by_id(id, raise_error)
 
