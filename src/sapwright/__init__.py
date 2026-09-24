@@ -71,6 +71,12 @@ class Sapwright:
         self._login(session)
         return session
 
+    def close_connection(self):
+        """
+        Closes the SAP connection including all sessions.
+        """
+        self._connection_mgr.close_connection()
+
     def _attach_existing(self) -> GuiSession | None:
         # find existing connections of the user
         connection = self._connection_mgr.find_connection_by_user(
