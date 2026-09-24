@@ -26,8 +26,11 @@ def _matches(
 
 
 class ConnectionManager:
-    @staticmethod
+    def __init__(self) -> None:
+        self._connection: Any = None
+
     def find_connection_by_user(
+        self,
         username: str,
         connection_string: str | None = None,
         connection_name: str | None = None,
@@ -67,12 +70,13 @@ class ConnectionManager:
             sessions = connection.Children
             for j in range(sessions.Count):
                 if _normalize(sessions(j).Info.User) == user:
+                    self._connection = connection
                     return connection
 
         return None
 
-    @staticmethod
     def open_connection(
+        self,
         connection_string: str | None = None,
         connection_name: str | None = None,
     ) -> GuiSession:
@@ -98,8 +102,24 @@ class ConnectionManager:
                 )
             else:
                 connection = application.OpenConnection(connection_name, True, True)
+
+            self._connection = connection
             return GuiSession(connection.Children(0))
         except Exception as e:
             msg = f"Failed to open SAP connection: {e}"
             logger.error(msg)
             raise SAPConnectionError(msg) from e
+
+    def close_connection(self):
+        """
+        Closes the SAP connection including all sessions.
+        This method closes the SAP connection and all associated sessions,
+        and cleans up the internal references to the SAP GUI objects.
+        """
+        try:
+            self._connection.CloseConnection()
+            logger.debug("SAP connection closed")
+        except Exception as e:
+            logger.error(f"Error while closing connection: {e}")
+
+        self._connection = None

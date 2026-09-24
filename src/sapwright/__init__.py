@@ -46,6 +46,7 @@ class Sapwright:
         self._language = language
         self._terminate_other_sessions = terminate_other_sessions
         self._exe_path = exe_path
+        self._connection_mgr = ConnectionManager()
         self._session: GuiSession | None = None
 
     def __enter__(self):
@@ -72,7 +73,7 @@ class Sapwright:
 
     def _attach_existing(self) -> GuiSession | None:
         # find existing connections of the user
-        connection = ConnectionManager.find_connection_by_user(
+        connection = self._connection_mgr.find_connection_by_user(
             self._username,
             connection_string=self._connection_string,
             connection_name=self._connection_name,
@@ -90,7 +91,7 @@ class Sapwright:
             f"No existing connection with given connection_string or connection_name found for user: {self._username}, opening a new one"
         )
         launch_saplogon(self._exe_path)
-        return ConnectionManager.open_connection(
+        return self._connection_mgr.open_connection(
             connection_string=self._connection_string,
             connection_name=self._connection_name,
         )
