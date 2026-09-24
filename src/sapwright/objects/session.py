@@ -226,6 +226,16 @@ class GuiSession(GuiComponent):
             # This is expected if the session is not the last one.
             logger.debug(f"Session closed without confirmation dialog: {e}")
 
+    def close_connection(self):
+        """Closes the SAP connection including all other open sessions to this connection.
+        Note: Unsaved changes are lost and not saved.
+        """
+        self.send_command("/nex")
+
+    def close_all_sessions(self):
+        """Alias for close_connection"""
+        self.close_connection()
+
     @override
     def send_vkey(
         self,
