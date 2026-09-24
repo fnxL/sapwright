@@ -57,12 +57,7 @@ dev = [
     { include-group = "tests" },
     { include-group = "type-check" },
 ]
-test = [
-    "pydantic-settings>=2.15.0",
-]
-
-[tool.pytest.ini_options]
-addopts = "-p no:faulthandler"
+test = ["pydantic-settings>=2.15.0"]
 
 [tool.ruff.lint]
 ignore = ["BLE001"]
