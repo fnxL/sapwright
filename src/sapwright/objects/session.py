@@ -47,6 +47,7 @@ class GuiSession(GuiComponent):
             response_time=info.ResponseTime,
             round_trips=info.RoundTrips,
             screen_number=info.ScreenNumber,
+            scripting_mode_force_notification=info.ScriptingModeForceNotification,
             scripting_mode_read_only=info.ScriptingModeReadOnly,
             scripting_mode_recording_disabled=info.ScriptingModeRecordingDisabled,
             session_number=info.SessionNumber,
