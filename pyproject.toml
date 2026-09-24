@@ -61,6 +61,9 @@ test = [
     "pydantic-settings>=2.15.0",
 ]
 
+[tool.pytest.ini_options]
+addopts = "-p no:faulthandler"
+
 [tool.ruff.lint]
 ignore = ["BLE001"]
 
