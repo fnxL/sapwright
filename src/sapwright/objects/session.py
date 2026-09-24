@@ -13,7 +13,9 @@ from sapwright.objects.component import GuiComponent
 from sapwright.types import GuiComponentType, VKey
 
 logger = logging.getLogger(__name__)
+
 STATUS_BAR_CTRL_ID = "wnd[0]/sbar"
+TITLEBAR_CTRL_ID = "wnd[0]/titl"
 
 
 class GuiSession(GuiComponent):
@@ -156,6 +158,14 @@ class GuiSession(GuiComponent):
     def findById(self, id: str, raise_error: bool = True) -> GuiComponent | None:
         """Alias for find_by_id"""
         return self.find_by_id(id, raise_error)
+
+    def title(self) -> str:
+        """Returns the text of GuiTitleBar of the session."""
+        titlebar = self.find_by_id(TITLEBAR_CTRL_ID, False)
+        if not titlebar:
+            raise SAPElementNotFound("Title bar not found")
+
+        return titlebar.text
 
     def create_session(self):
         """This function opens a new session, which is then visualized by a new main window. This resembles the “/o” command that can be executed from the command field."""
