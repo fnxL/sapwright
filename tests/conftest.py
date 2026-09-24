@@ -45,4 +45,4 @@ def session():
     )
     session = sap.connect()
     yield session
-    session.close()
+    session.close_connection()
