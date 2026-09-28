@@ -1,9 +1,11 @@
 import logging
+from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
 from typing import final
 
-from sapwright._utils import launch_saplogon
+from sapwright._utils import default_password_generator, launch_saplogon
 from sapwright.connection_manager import ConnectionManager
 from sapwright.exceptions import SAPLoginError
 from sapwright.objects import GuiSession
@@ -11,12 +13,16 @@ from sapwright.objects import GuiSession
 logger = logging.getLogger(__name__)
 
 
+@dataclass
 class SAPLoginScreenElements:
     client = "wnd[0]/usr/txtRSYST-MANDT"
     username = "wnd[0]/usr/txtRSYST-BNAME"
     password = "wnd[0]/usr/pwdRSYST-BCODE"
     language = "wnd[0]/usr/txtRSYST-LANGU"
     terminate_other_sessions_radio = "wnd[1]/usr/radMULTI_LOGON_OPT1"
+    reset_password = r"wnd[1]/usr/lblRSYST-NCODE_TEXT"
+    new_password = "wnd[1]/usr/pwdRSYST-NCODE"
+    repeat_password = "wnd[1]/usr/pwdRSYST-NCOD2"
 
 
 @final
@@ -31,9 +37,14 @@ class Sapwright:
         language: str | None = None,
         terminate_other_sessions: bool = True,
         exe_path: str | Path | None = None,
+        password_generator: Callable[[], str] | None = None,
     ):
         """
         First preference is given to the connection_string, then connection_name.
+
+        password_generator is called to produce a new password when SAP asks
+        for a password change during login. Defaults to month and year of
+        today's date, e.g. "Jan@2026".
         """
         if not connection_string and not connection_name:
             raise ValueError("connection_string or connection_name must be provided.")
@@ -46,6 +57,7 @@ class Sapwright:
         self._language = language
         self._terminate_other_sessions = terminate_other_sessions
         self._exe_path = exe_path
+        self._password_generator = password_generator or default_password_generator
         self._connection_mgr = ConnectionManager()
         self._session: GuiSession | None = None
 
@@ -154,8 +166,31 @@ class Sapwright:
         if status.text and "already logged on" in status.text.lower():
             self._handle_multi_logon(session)
 
+        # Handle new/reset password dialog
+        if session.find_by_id(SAPLoginScreenElements.reset_password, False):
+            self._change_password(session)
+
         # Dismiss any other popups
         session.dismiss_popups(limit=10)
+
+    def _change_password(self, session: GuiSession):
+        logger.debug("Password change requested")
+        new_password = self._password_generator()
+        if not new_password:
+            raise SAPLoginError("password_generator must return a non-empty string.")
+
+        session.find_by_id(SAPLoginScreenElements.new_password).text = new_password
+        session.find_by_id(SAPLoginScreenElements.repeat_password).text = new_password
+        session.press_enter(1)
+
+        session.raise_for_status(
+            message="Password change failed", exception=SAPLoginError
+        )
+        if session.find_by_id(SAPLoginScreenElements.reset_password, False):
+            raise SAPLoginError("Password change failed: new password was rejected.")
+
+        self._password = new_password
+        logger.info(f"Password changed for user: {self._username}")
 
     def _handle_multi_logon(self, session: GuiSession):
         # TODO: If server supports multi-logon, allow user to multi-logon

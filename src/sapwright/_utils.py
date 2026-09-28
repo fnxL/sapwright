@@ -1,6 +1,7 @@
 import logging
 import sys
 import winreg
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -117,6 +118,17 @@ def get_saplogon_path() -> Path | None:
             return path
 
     return None
+
+
+def default_password_generator() -> str:
+    """Generates a password from the current month abbreviation and year.
+
+    Example
+    -------
+    >>> default_password_generator()  # on 2026-01-15
+    'Jan@2026'
+    """
+    return datetime.now(UTC).date().strftime("%b@%Y")
 
 
 def get_scripting_engine() -> Any | None:
