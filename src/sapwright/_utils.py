@@ -1,7 +1,7 @@
+import datetime
 import logging
 import sys
 import winreg
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -128,7 +128,7 @@ def default_password_generator() -> str:
     >>> default_password_generator()  # on 2026-01-15
     'Jan@2026'
     """
-    return datetime.now(UTC).date().strftime("%b@%Y")
+    return datetime.date.today().strftime("%b@%Y")  # noqa: DTZ011
 
 
 def get_scripting_engine() -> Any | None:
