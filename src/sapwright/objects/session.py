@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 STATUS_BAR_CTRL_ID = "wnd[0]/sbar"
 TITLEBAR_CTRL_ID = "wnd[0]/titl"
+MAIN_WINDOW_CTRL_ID = "wnd[0]"
 
 
 class GuiSession(GuiComponent):
@@ -404,6 +405,10 @@ class GuiSession(GuiComponent):
 
         error_message = f"{message}: {sbar.text}" if message else sbar.text
         raise exception(error_message)
+
+    def maximize(self):
+        """Maximizes the main window of the session."""
+        self._com.FindById(MAIN_WINDOW_CTRL_ID).Maximize()
 
     # Aliases
     Busy = busy
