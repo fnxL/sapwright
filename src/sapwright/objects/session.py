@@ -10,8 +10,7 @@ from sapwright.exceptions import (
     SAPTransactionError,
 )
 from sapwright.models import SessionInfo, StatusBarMsg
-from sapwright.objects.collection import GuiComponentCollection
-from sapwright.objects.component import ComponentT, GuiComponent
+from sapwright.objects.component import ComponentT, GuiComponent, GuiComponentCollection
 from sapwright.types import GuiComponentType, VKey
 
 logger = logging.getLogger(__name__)

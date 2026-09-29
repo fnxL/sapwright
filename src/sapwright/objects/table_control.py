@@ -1,8 +1,7 @@
 from typing import overload
 
 from sapwright.exceptions import SAPElementTypeMismatch
-from sapwright.objects.collection import GuiComponentCollection
-from sapwright.objects.component import ComponentT, GuiComponent
+from sapwright.objects.component import ComponentT, GuiComponent, GuiComponentCollection
 from sapwright.objects.scrollbar import GuiScrollbar
 
 
