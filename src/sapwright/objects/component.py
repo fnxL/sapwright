@@ -1,6 +1,6 @@
 import logging
 from datetime import date, datetime
-from typing import Any
+from typing import Any, ClassVar
 
 from typing_extensions import override
 
@@ -11,6 +11,51 @@ logger = logging.getLogger(__name__)
 
 
 class GuiComponent:
+    # SAP SubType this wrapper represents, None matches anything
+    subtype: ClassVar[str | None] = None
+
+    @override
+    def __init_subclass__(
+        cls,
+        subtype: str | None = None,
+    ):
+        """Declares which SAP element a wrapper class represents.
+
+        By default the class name is used as the SAP Type, e.g. GuiTableControl.
+        Shell controls report Type "GuiShell" with the kind in SubType, so they
+        only declare the subtype and inherit the type from their parent, e.g.
+        ``class GuiGridView(GuiShell, sap_subtype="GridView")``.
+        """
+        cls.subtype = subtype
+
+    @classmethod
+    def _matches(cls, com_object: Any) -> bool:
+        """Return whether a SAP GUI COM object matches this class.
+
+        A COM object normally matches when its ``Type`` attribute is equal to
+        the class name. SAP ``GuiShell`` controls are an exception: they report
+        ``Type == "GuiShell"`` and use the ``SubType`` attribute to identify the
+        specific control type. Therefore, ``SubType`` is also checked when the
+        attribute is available.
+
+        Parameters
+        ----------
+        com_object : Any
+            The SAP GUI COM object to check
+
+        Returns
+        -------
+        bool
+            True if the object's Type matches the class name or its SubType matches cls.subtype; otherwise, False.
+        """
+        own = com_object.Type == cls.__name__ or (
+            com_object.SubType == cls.subtype
+            if hasattr(com_object, "SubType")
+            else False
+        )
+        # or any(sub._matches(com_object) for sub in cls.__subclasses__())
+        return own
+
     def __init__(self, com_object: Any):
         self._com = com_object
 

@@ -1,10 +1,11 @@
 import logging
-from typing import Literal, overload
+from typing import Literal, TypeVar, overload
 
 from typing_extensions import override
 
 from sapwright.exceptions import (
     SAPElementNotFound,
+    SAPElementTypeMismatch,
     SAPStatusBarError,
     SAPTransactionError,
 )
@@ -16,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 STATUS_BAR_CTRL_ID = "wnd[0]/sbar"
 TITLEBAR_CTRL_ID = "wnd[0]/titl"
+
+ComponentT = TypeVar("ComponentT", bound=GuiComponent)
 
 
 class GuiSession(GuiComponent):
@@ -129,18 +132,77 @@ class GuiSession(GuiComponent):
 
     @overload
     def find_by_id(
-        self, id: str, raise_error: Literal[True] = True
+        self,
+        id: str,
+        raise_error: Literal[True] = True,
+        *,
+        expected_type: None = None,
     ) -> GuiComponent: ...
 
     @overload
     def find_by_id(
-        self, id: str, raise_error: Literal[False]
+        self,
+        id: str,
+        raise_error: Literal[False],
+        *,
+        expected_type: None = None,
     ) -> GuiComponent | None: ...
 
     @overload
-    def find_by_id(self, id: str, raise_error: bool) -> GuiComponent | None: ...
+    def find_by_id(
+        self,
+        id: str,
+        raise_error: bool,
+        *,
+        expected_type: None = None,
+    ) -> GuiComponent | None: ...
 
-    def find_by_id(self, id: str, raise_error: bool = True) -> GuiComponent | None:
+    @overload
+    def find_by_id(
+        self,
+        id: str,
+        raise_error: Literal[True] = True,
+        *,
+        expected_type: type[ComponentT],
+    ) -> ComponentT: ...
+
+    @overload
+    def find_by_id(
+        self, id: str, raise_error: Literal[False], *, expected_type: type[ComponentT]
+    ) -> ComponentT | None: ...
+
+    @overload
+    def find_by_id(
+        self, id: str, raise_error: bool, *, expected_type: type[ComponentT]
+    ) -> ComponentT | None: ...
+
+    def find_by_id(
+        self,
+        id: str,
+        raise_error: bool = True,
+        *,
+        expected_type: type[GuiComponent] | None = None,
+    ) -> GuiComponent | None:
+        """Finds an element by its ID.
+
+        Parameters
+        ----------
+        id : str
+            The element ID, e.g. "wnd[0]/usr/ctxtVBAK-AUART"
+        raise_error : bool, optional
+            Raise if the element is not found, else return None, by default True
+        expected_type : type[GuiComponent] | None, optional
+            Wrapper class to return, e.g. GuiTableControl. The element's SAP type
+            must match the class or one of its subclasses. By default a plain
+            GuiComponent is returned.
+
+        Raises
+        ------
+        SAPElementNotFound
+            If the element is not found and raise_error is True
+        SAPElementTypeMismatch
+            If the element's type does not match expected_type
+        """
         element = self._com.findById(id, False)  # False = don't raise error
         if element is None:
             logger.debug("Element not found", extra={"id": id, "parent": self.id})
@@ -148,17 +210,15 @@ class GuiSession(GuiComponent):
                 raise SAPElementNotFound(f"Element not found: {id}")
             return None
 
-        return GuiComponent(element)
+        expected_type = expected_type or GuiComponent
+        if not expected_type._matches(element):
+            raise SAPElementTypeMismatch(
+                f"Element '{id}' is of type {element.Type}, expected {expected_type.__name__}"
+            )
+        return expected_type(element)
 
-    @overload
-    def findById(self, id: str, raise_error: Literal[True] = True) -> GuiComponent: ...
-
-    @overload
-    def findById(self, id: str, raise_error: Literal[False]) -> GuiComponent | None: ...
-
-    def findById(self, id: str, raise_error: bool = True) -> GuiComponent | None:
-        """Alias for find_by_id"""
-        return self.find_by_id(id, raise_error)
+    findById = find_by_id
+    """Alias for find_by_id"""
 
     def title(self) -> str:
         """Returns the text of GuiTitleBar of the session."""
