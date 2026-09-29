@@ -5,6 +5,7 @@ from typing import Any, ClassVar, TypeVar
 from typing_extensions import override
 
 from sapwright.exceptions import SAPComboBoxOptionNotFound, SAPElementNotChangeable
+from sapwright.objects.collection import GuiComponentCollection
 from sapwright.types import GuiComponentType, VKey
 
 logger = logging.getLogger(__name__)
@@ -91,7 +92,10 @@ class GuiComponent:
 
     @property
     def children(self):
-        return getattr(self._com, "Children", None)
+        child = getattr(self._com, "Children", None)
+        if child is None:
+            return None
+        return GuiComponentCollection(child)
 
     @property
     def changeable(self) -> bool:
@@ -256,10 +260,6 @@ class GuiComponent:
         """Sends a virtual key to this element (usually a window)."""
         self._com.sendVKey(int(vkey))
 
-    def sendVKey(self, vkey: VKey | int):
-        """Alias for send_vkey"""
-        return self.send_vkey(vkey)
-
     def visualize(self, on: bool = True):
         """Calling this method of a component will display a red frame around the specified component if the parameter on is true."""
         self._com.Visualize(on)
@@ -267,10 +267,6 @@ class GuiComponent:
     def set_focus(self):
         """This function can be used to set the focus onto an object. If a user interacts with SAP GUI, it moves the focus whenever the interaction is with a new object. Interacting with an object through the scripting component does not change the focus. There are some cases in which the SAP application explicitly checks for the focus and behaves differently depending on the focused object."""
         self._com.SetFocus()
-
-    def setFocus(self):
-        """Alias for set_focus"""
-        return self.set_focus()
 
     def _select_combobox_entry(self, text: str) -> bool:
         """
@@ -300,6 +296,29 @@ class GuiComponent:
         raise SAPComboBoxOptionNotFound(
             f"Option '{text}' not found in ComboBox {self.name} with id: {self.id}"
         )
+
+    # Aliases
+    Id = id
+    Name = name
+    Type = type
+    Children = children
+    Changeable = changeable
+    DefaultTooltip = default_tooltip
+    Height = height
+    IconName = icon_name
+    IsSymbolFont = is_symbol_font
+    Left = left
+    Modified = modified
+    ScreenLeft = screen_left
+    ScreenTop = screen_top
+    Tooltip = tooltip
+    Top = top
+    Width = width
+    Text = text
+
+    SetFocus = set_focus
+    sendVKey = send_vkey
+    Visualize = visualize
 
 
 ComponentT = TypeVar("ComponentT", bound=GuiComponent)

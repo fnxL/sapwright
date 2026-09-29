@@ -10,6 +10,7 @@ from sapwright.exceptions import (
     SAPTransactionError,
 )
 from sapwright.models import SessionInfo, StatusBarMsg
+from sapwright.objects.collection import GuiComponentCollection
 from sapwright.objects.component import ComponentT, GuiComponent
 from sapwright.types import GuiComponentType, VKey
 
@@ -26,7 +27,7 @@ class GuiSession(GuiComponent):
 
     @property
     def error_list(self):
-        return self._com.ErrorList
+        return GuiComponentCollection(self._com.ErrorList)
 
     @property
     def info(self) -> SessionInfo:
@@ -217,9 +218,6 @@ class GuiSession(GuiComponent):
             )
         return expected_type(element)
 
-    findById = find_by_id
-    """Alias for find_by_id"""
-
     def title(self) -> str:
         """Returns the text of GuiTitleBar of the session."""
         titlebar = self.find_by_id(TITLEBAR_CTRL_ID, False)
@@ -327,16 +325,6 @@ class GuiSession(GuiComponent):
         for _ in range(repeat_count):
             wnd.sendVKey(int(vkey))
 
-    @override
-    def sendVKey(
-        self,
-        vkey: VKey | int,
-        window_index: int = 0,
-        repeat_count: int = 1,
-    ):
-        """Alias for send_vkey"""
-        return self.send_vkey(vkey, window_index, repeat_count)
-
     def press_enter(self, window_index: int = 0, repeat_count: int = 1):
         """Sends the ENTER key to a window."""
         return self.send_vkey(VKey.ENTER, window_index, repeat_count)
@@ -417,3 +405,28 @@ class GuiSession(GuiComponent):
 
         error_message = f"{message}: {sbar.text}" if message else sbar.text
         raise exception(error_message)
+
+    # Aliases
+    Busy = busy
+    ErrorList = error_list
+    Info = info
+    IsActive = is_active
+    IsListboxActive = is_listbox_active
+    ListboxCurrEntry = listbox_curr_entry
+    PassportSystemId = passport_system_id
+    PassportPreSystemId = passport_pre_system_id
+    PassportTransactionId = passport_transaction_id
+    ProgressPercent = progress_percent
+    ProgressText = progress_text
+    ShowDropdownKeys = show_dropdown_keys
+    TestToolMode = test_tool_mode
+
+    findById = find_by_id
+    CreateSession = create_session
+    GetVKeyDescription = get_vkey_description
+    LockSessionUI = lock_session_ui
+    UnlockSessionUI = unlock_session_ui
+    SendCommand = send_command
+    StartTransaction = start_transaction
+    EndTransaction = end_transaction
+    sendVKey = send_vkey
