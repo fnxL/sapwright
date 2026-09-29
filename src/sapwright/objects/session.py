@@ -1,5 +1,5 @@
 import logging
-from typing import Literal, TypeVar, overload
+from typing import Literal, overload
 
 from typing_extensions import override
 
@@ -10,15 +10,13 @@ from sapwright.exceptions import (
     SAPTransactionError,
 )
 from sapwright.models import SessionInfo, StatusBarMsg
-from sapwright.objects.component import GuiComponent
+from sapwright.objects.component import ComponentT, GuiComponent
 from sapwright.types import GuiComponentType, VKey
 
 logger = logging.getLogger(__name__)
 
 STATUS_BAR_CTRL_ID = "wnd[0]/sbar"
 TITLEBAR_CTRL_ID = "wnd[0]/titl"
-
-ComponentT = TypeVar("ComponentT", bound=GuiComponent)
 
 
 class GuiSession(GuiComponent):
@@ -210,8 +208,10 @@ class GuiSession(GuiComponent):
                 raise SAPElementNotFound(f"Element not found: {id}")
             return None
 
-        expected_type = expected_type or GuiComponent
-        if not expected_type._matches(element):
+        if expected_type is None:
+            return GuiComponent(element)
+
+        if not expected_type.matches(element):
             raise SAPElementTypeMismatch(
                 f"Element '{id}' is of type {element.Type}, expected {expected_type.__name__}"
             )

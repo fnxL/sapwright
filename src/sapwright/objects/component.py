@@ -1,6 +1,6 @@
 import logging
 from datetime import date, datetime
-from typing import Any, ClassVar
+from typing import Any, ClassVar, TypeVar
 
 from typing_extensions import override
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class GuiComponent:
     # SAP SubType this wrapper represents, None matches anything
-    subtype: ClassVar[str | None] = None
+    _subtype: ClassVar[str | None] = None
 
     @override
     def __init_subclass__(
@@ -26,10 +26,10 @@ class GuiComponent:
         only declare the subtype and inherit the type from their parent, e.g.
         ``class GuiGridView(GuiShell, sap_subtype="GridView")``.
         """
-        cls.subtype = subtype
+        cls._subtype = subtype
 
     @classmethod
-    def _matches(cls, com_object: Any) -> bool:
+    def matches(cls, com_object: Any) -> bool:
         """Return whether a SAP GUI COM object matches this class.
 
         A COM object normally matches when its ``Type`` attribute is equal to
@@ -46,14 +46,14 @@ class GuiComponent:
         Returns
         -------
         bool
-            True if the object's Type matches the class name or its SubType matches cls.subtype; otherwise, False.
+            True if the object's Type matches the class name or its SubType matches cls._subtype; otherwise, False.
         """
         own = com_object.Type == cls.__name__ or (
-            com_object.SubType == cls.subtype
+            com_object.SubType == cls._subtype
             if hasattr(com_object, "SubType")
             else False
         )
-        # or any(sub._matches(com_object) for sub in cls.__subclasses__())
+        # or any(sub.matches(com_object) for sub in cls.__subclasses__())
         return own
 
     def __init__(self, com_object: Any):
@@ -300,3 +300,6 @@ class GuiComponent:
         raise SAPComboBoxOptionNotFound(
             f"Option '{text}' not found in ComboBox {self.name} with id: {self.id}"
         )
+
+
+ComponentT = TypeVar("ComponentT", bound=GuiComponent)
