@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from typing import overload
 
 from sapwright.exceptions import SAPElementTypeMismatch
@@ -6,6 +7,13 @@ from sapwright.objects.scrollbar import GuiScrollbar
 
 
 class GuiTableRow(GuiComponent):
+    def __getitem__(self, index: int) -> GuiComponent:
+        return GuiComponent(self._com[index])
+
+    def __iter__(self) -> Iterator[GuiComponent]:
+        for i in range(self.count):
+            yield self[i]
+
     @property
     def count(self) -> int:
         """Number of cells in row"""
@@ -180,7 +188,10 @@ class GuiTableControl(GuiComponent):
     ) -> GuiComponent: ...
 
     def get_cell(
-        self, row: int, column: int, expected_type: type[GuiComponent] | None = None
+        self,
+        row: int,
+        column: int,
+        expected_type: type[GuiComponent] | None = None,
     ) -> GuiComponent:
         """This method returns a given table cell. It is more efficient than accessing a single cell using the rows or columns collections. Syntax
 
