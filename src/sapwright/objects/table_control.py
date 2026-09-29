@@ -1,9 +1,10 @@
 from collections.abc import Iterator
-from typing import overload
+from typing import Any, overload
 
 from sapwright.exceptions import SAPElementTypeMismatch
 from sapwright.objects.component import ComponentT, GuiComponent, GuiComponentCollection
 from sapwright.objects.scrollbar import GuiScrollbar
+from sapwright.objects.session import GuiSession
 
 
 class GuiTableRow(GuiComponent):
@@ -93,6 +94,15 @@ class GuiTableColumn(GuiComponent):
 
 
 class GuiTableControl(GuiComponent):
+    def __init__(
+        self,
+        com_object: Any,
+        session: "GuiSession | None" = None,
+        control_id: str | None = None,
+    ):
+        super().__init__(com_object, session, control_id)
+        self.headers = self.get_table_headers()
+
     @property
     def columns(self):
         return GuiComponentCollection(self._com.Columns, expected_type=GuiTableColumn)
