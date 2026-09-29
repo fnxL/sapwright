@@ -101,7 +101,12 @@ class GuiTableControl(GuiComponent):
         control_id: str | None = None,
     ):
         super().__init__(com_object, session, control_id)
-        self.headers = self.get_table_headers()
+        self._headers = self.get_table_headers()
+
+    @property
+    def headers(self) -> dict[str, int]:
+        """Mapping of table headers to header index"""
+        return self._headers
 
     @property
     def columns(self):
