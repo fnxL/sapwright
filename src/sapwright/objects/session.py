@@ -209,13 +209,13 @@ class GuiSession(GuiComponent):
             return None
 
         if expected_type is None:
-            return GuiComponent(element)
+            return GuiComponent(element, self, id)
 
         if not expected_type.matches(element):
             raise SAPElementTypeMismatch(
                 f"Element '{id}' is of type {element.Type}, expected {expected_type.__name__}"
             )
-        return expected_type(element)
+        return expected_type(element, self, id)
 
     def title(self) -> str:
         """Returns the text of GuiTitleBar of the session."""

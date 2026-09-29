@@ -1,7 +1,11 @@
+# pyright: reportImportCycles=false
+# GuiSession subclasses GuiComponent but GuiComponent.__init__ stores a typed
+# back-reference to the GuiSession that created it, so component.py <-> session.py
+# is an intentional cycle in the type graph, not an accidental coupling.
 import logging
 from collections.abc import Iterator
 from datetime import date, datetime
-from typing import Any, ClassVar, Generic, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar, cast, overload
 
 from typing_extensions import override
 
@@ -11,6 +15,9 @@ from sapwright.exceptions import (
     SAPElementTypeMismatch,
 )
 from sapwright.types import GuiComponentType, VKey
+
+if TYPE_CHECKING:
+    from sapwright.objects.session import GuiSession
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +68,15 @@ class GuiComponent:
         # or any(sub.matches(com_object) for sub in cls.__subclasses__())
         return own
 
-    def __init__(self, com_object: Any):
+    def __init__(
+        self,
+        com_object: Any,
+        session: "GuiSession | None" = None,
+        control_id: str | None = None,
+    ):
         self._com = com_object
+        self._session = session
+        self._control_id = control_id
 
     def __getattr__(self, name: str) -> Any:
         """Delegate attribute access to the underlying SAP element."""

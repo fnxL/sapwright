@@ -219,6 +219,16 @@ class GuiTableControl(GuiComponent):
 
         return expected_type(cell)
 
+    def refresh(self):
+        """Refreshes the table control. This method is useful when the table has been paginated, or scrolled, the old reference to table control com object is no longer valid. This method will refresh the table control and return the new reference to the com object."""
+        if not self._session:
+            return
+
+        if not self._control_id:
+            return
+
+        self._com = self._session._com.FindById(self._control_id, False)
+
     # Aliases
     Columns = columns
     Rows = rows
