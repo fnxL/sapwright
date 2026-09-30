@@ -474,6 +474,7 @@ dependencies = [
     { name = "pydantic" },
     { name = "pywin32", marker = "sys_platform == 'win32'" },
     { name = "pywinauto" },
+    { name = "types-pywin32" },
 ]
 
 [package.dev-dependencies]
@@ -503,6 +504,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.13.5" },
     { name = "pywin32", marker = "sys_platform == 'win32'", specifier = ">=312" },
     { name = "pywinauto", specifier = ">=0.6.9" },
+    { name = "types-pywin32", specifier = ">=312.0.0.20260928" },
 ]
 
 [package.metadata.requires-dev]
@@ -527,6 +529,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
+]
+
+[[package]]
+name = "types-pywin32"
+version = "312.0.0.20260928"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/cc/39/476d851d215ce19c3234bb726e1f6417f1b636723573d0c1351f138d93cc/types_pywin32-312.0.0.20260928.tar.gz", hash = "sha256:a06b6edb3dbeb3d6e9a3fada3e7fadbb97e9ae998d394ff3545efdd1090932c4", size = 357631, upload-time = "2026-09-28T07:50:48.206Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/20/e6/8c87f81a114cdb0abf4c9a55153b10e85eba7a4ef5292d4557cdcfc39f15/types_pywin32-312.0.0.20260928-py3-none-any.whl", hash = "sha256:173c0498ba0d6e3c02d05e96c999fbfbd89feef5ce2eae238ddbaac614aeb51a", size = 419382, upload-time = "2026-09-28T07:50:47.133Z" },
 ]
 
 [[package]]

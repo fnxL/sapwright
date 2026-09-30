@@ -11,6 +11,7 @@ dependencies = [
     "pydantic>=2.13.5",
     "pywinauto>=0.6.9",
     "pywin32>=312; sys_platform=='win32'",
+    "types-pywin32>=312.0.0.20260928",
 ]
 keywords = [
     "sap",
