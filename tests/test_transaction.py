@@ -9,6 +9,7 @@ pytestmark = pytest.mark.skipif(
     sys.platform != "win32", reason="SAP GUI COM is Windows-only"
 )
 
+
 def test_start_transaction(session: GuiSession):
     session.start_transaction("va01")
     assert "create sales order" in session.title().lower()
