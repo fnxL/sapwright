@@ -135,7 +135,7 @@ from sapwright.objects import GuiTableControl
 
 table = session.find_by_id("wnd[0]/usr/tblITEMS", expected_type=GuiTableControl)
 
-print(table.headers)          # {"material": 0, "quantity": 1, ...}
+print(table.headers)  # {"material": 0, "quantity": 1, ...}
 print(table.row_count, table.visible_row_count)
 
 for row in table.rows:
@@ -171,8 +171,8 @@ session.raise_for_status(message="Order creation failed")
 from sapwright.types import VKey
 
 session.press_enter()
-session.send_vkey(VKey.CTRL_S)          # Save
-session.dismiss_popups(limit=5)         # clears stacked confirmation dialogs
+session.send_vkey(VKey.CTRL_S)  # Save
+session.dismiss_popups(limit=5)  # clears stacked confirmation dialogs
 ```
 
 ## Example scripts
@@ -205,8 +205,10 @@ with Sapwright(
 ```python
 from sapwright import Sapwright
 
+
 def new_password() -> str:
     return "NewSecret@2026"
+
 
 with Sapwright(
     username="jdoe",
