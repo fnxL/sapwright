@@ -189,7 +189,16 @@ class GuiTableControl(GuiComponent):
         self._com.ReorderTable(permutation)
 
     def get_absolute_row(self, index: int) -> GuiTableRow:
-        """Unlike the rows collection, the indexing supported by this function does not reset the index after scrolling, but counts the rows starting with the first row with respect to the first scroll position. If the selected row is not currently visible then an exception is raised."""
+        """Unlike the rows collection, the indexing supported by this function does not reset the index after scrolling, but counts the rows starting with the first row with respect to the first scroll position. If the selected row is not currently visible then it will try to go to the scroll position, refresh the table and return the row."""
+        try:
+            return GuiTableRow(self._com.GetAbsoluteRow(index))
+        except Exception as e:
+            # This is expected if the row is not visible
+            # try to go to the scroll position
+            self.vertical_scrollbar.position = index
+            # refresh the table
+            self.refresh()
+
         return GuiTableRow(self._com.GetAbsoluteRow(index))
 
     @overload
