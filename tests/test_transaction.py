@@ -5,8 +5,9 @@ import pytest
 from sapwright.exceptions import SAPTransactionError
 from sapwright.objects import GuiSession
 
-pytest.mark.skipif(sys.platform != "win32", reason="SAP GUI COM is Windows-only")
-
+pytestmark = pytest.mark.skipif(
+    sys.platform != "win32", reason="SAP GUI COM is Windows-only"
+)
 
 def test_start_transaction(session: GuiSession):
     session.start_transaction("va01")
