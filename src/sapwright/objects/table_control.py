@@ -192,7 +192,7 @@ class GuiTableControl(GuiComponent):
         """Unlike the rows collection, the indexing supported by this function does not reset the index after scrolling, but counts the rows starting with the first row with respect to the first scroll position. If the selected row is not currently visible then it will try to go to the scroll position, refresh the table and return the row."""
         try:
             return GuiTableRow(self._com.GetAbsoluteRow(index))
-        except Exception as e:
+        except Exception:
             # This is expected if the row is not visible
             # try to go to the scroll position
             self.vertical_scrollbar.position = index
