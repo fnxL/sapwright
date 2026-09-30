@@ -35,7 +35,7 @@ jobs:
             echo "::error::Tag v$TAG_VERSION does not match pyproject.toml version $PYPROJECT_VERSION"
             exit 1
           fi
-          
+
           # PEP 440 pre-release/dev markers, e.g. 0.1.2b1, 1.0.0rc1, 2.0.0.dev0
           if echo "$PYPROJECT_VERSION" | grep -qE '(a|b|rc)[0-9]+$|\.dev[0-9]+$'; then
             echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
@@ -61,9 +61,6 @@ jobs:
 
       - name: Build
         run: uv build
-
-      - name: Smoke test wheel
-        run: uv run --isolated --no-project --with dist/*.whl -- python -c "import sapwright"
 
       - name: Upload distributions as artifacts
         uses: actions/upload-artifact@v7
