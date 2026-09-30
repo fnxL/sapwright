@@ -25,9 +25,6 @@ jobs:
       - name: Ruff (format check)
         run: uv run ruff format --check .
 
-      - name: basedpyright (type check)
-        run: uv run basedpyright
-
   type-check:
     name: Type check
     runs-on: windows-latest
