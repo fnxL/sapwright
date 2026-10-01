@@ -22,7 +22,10 @@ REGISTRY_KEYS = (
 )
 
 
-def launch_saplogon(exe_path: str | Path | None = None, timeout: int = 60) -> None:
+def launch_saplogon(
+    exe_path: str | Path | None = None,
+    timeout: int = DEFAULT_TIMEOUT,
+) -> None:
     """Launches the SAP Logon Pad executable and waits for it to become ready.
     If no exe_path is provided, saplogon.exe is resolved from windows registry.
 
