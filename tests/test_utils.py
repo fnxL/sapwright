@@ -1,79 +1,35 @@
 import sys
-from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
 
 from sapwright import _utils
-from sapwright._utils import is_process_running
 
 
-@pytest.fixture
-def fake_processes(monkeypatch: pytest.MonkeyPatch):
-    def _set(*names: str | None):
-        procs = [SimpleNamespace(info={"name": name}) for name in names]
-        monkeypatch.setattr(
-            _utils.psutil, "process_iter", lambda attrs=None: iter(procs)
-        )
-
-    return _set
+@pytest.fixture(autouse=True)
+def _windows(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(sys, "platform", "win32")
 
 
-@pytest.fixture
-def saplogon_exe(tmp_path: Path) -> Path:
+def test_launch_skipped_when_already_running(monkeypatch: pytest.MonkeyPatch):
+    popen = MagicMock()
+    monkeypatch.setattr(_utils, "get_scripting_engine", lambda: object())
+    monkeypatch.setattr(_utils.subprocess, "Popen", popen)
+    _utils.launch_saplogon()
+    popen.assert_not_called()
+
+
+def test_launch_missing_exe(monkeypatch: pytest.MonkeyPatch, tmp_path):
+    monkeypatch.setattr(_utils, "get_scripting_engine", lambda: None)
+    with pytest.raises(FileNotFoundError):
+        _utils.launch_saplogon(tmp_path / "nope.exe")
+
+
+def test_launch_waits_for_engine(monkeypatch: pytest.MonkeyPatch, tmp_path):
     exe = tmp_path / "saplogon.exe"
     exe.touch()
-    return exe
-
-
-@pytest.fixture
-def fake_registry(monkeypatch: pytest.MonkeyPatch):
-    """Maps registry key paths to their SAPsysdir value; missing keys raise FileNotFoundError."""
-
-    def _set(entries: dict[str, str]):
-        def open_key(_hive, key_path):
-            if key_path not in entries:
-                raise FileNotFoundError(key_path)
-            return MagicMock(key_path=key_path)
-
-        def query_value(key, _name):
-            return entries[key.key_path], 1
-
-        monkeypatch.setattr(_utils.winreg, "OpenKey", open_key)
-        monkeypatch.setattr(_utils.winreg, "QueryValueEx", query_value)
-
-    return _set
-
-
-@pytest.fixture
-def launch_env(monkeypatch: pytest.MonkeyPatch, fake_processes):
-    """Windows platform, no running SAP Logon, and mocked Popen/Application."""
-    monkeypatch.setattr(sys, "platform", "win32")
-    fake_processes()
-
-    popen = MagicMock(return_value=SimpleNamespace(pid=1234))
-    application = MagicMock()
-    monkeypatch.setattr(_utils.psutil, "Popen", popen)
-    monkeypatch.setattr(_utils, "Application", application)
-    return SimpleNamespace(
-        popen=popen, app=application.return_value.connect.return_value
-    )
-
-
-# is_process_running
-
-
-def test_is_process_running_found(fake_processes):
-    fake_processes("python.exe", "saplogon.exe")
-    assert is_process_running("saplogon.exe") is True
-
-
-def test_is_process_running_case_insensitive(fake_processes):
-    fake_processes("SAPLogon.EXE")
-    assert is_process_running("saplogon.exe") is True
-
-
-def test_is_process_running_not_found(fake_processes):
-    fake_processes("python.exe", None)
-    assert is_process_running("saplogon.exe") is False
+    engines = iter([None, None, object(), object()])
+    monkeypatch.setattr(_utils, "get_scripting_engine", lambda: next(engines))
+    monkeypatch.setattr(_utils.subprocess, "Popen", MagicMock())
+    monkeypatch.setattr(_utils.time, "sleep", lambda _: None)
+    _utils.launch_saplogon(exe)
