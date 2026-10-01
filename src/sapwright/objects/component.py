@@ -59,13 +59,9 @@ class GuiComponent:
         bool
             True if the object's Type matches the class name or its SubType matches cls._subtype; otherwise, False.
         """
-        own = com_object.Type == cls.__name__ or (
-            com_object.SubType == cls._subtype
-            if hasattr(com_object, "SubType")
-            else False
+        return com_object.Type == cls.__name__ or (
+            hasattr(com_object, "SubType") and com_object.SubType == cls._subtype
         )
-        # or any(sub.matches(com_object) for sub in cls.__subclasses__())
-        return own
 
     def __init__(
         self,
