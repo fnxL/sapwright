@@ -1,6 +1,6 @@
 [project]
 name = "sapwright"
-version = "0.0.1"
+version = "0.0.2"
 description = "Python framework for SAP GUI Scripting/Automation"
 readme = "README.md"
 authors = [{ name = "fnxL", email = "ajaykanki.2e@gmail.com" }]
