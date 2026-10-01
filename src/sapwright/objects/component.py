@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 
 class GuiComponent:
-    # SAP SubType this wrapper represents, None matches anything
     _subtype: ClassVar[str | None] = None
 
     @override
@@ -36,7 +35,7 @@ class GuiComponent:
         By default the class name is used as the SAP Type, e.g. GuiTableControl.
         Shell controls report Type "GuiShell" with the kind in SubType, so they
         only declare the subtype and inherit the type from their parent, e.g.
-        ``class GuiGridView(GuiShell, sap_subtype="GridView")``.
+        ``class GuiGridView(GuiShell, subtype="GridView")``.
         """
         cls._subtype = subtype
 
