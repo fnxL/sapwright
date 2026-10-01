@@ -7,9 +7,7 @@ authors = [{ name = "fnxL", email = "ajaykanki.2e@gmail.com" }]
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
 dependencies = [
-    "psutil>=7.2.2",
     "pydantic>=2.13.5",
-    "pywinauto>=0.6.9",
     "pywin32>=312; sys_platform=='win32'",
 ]
 keywords = [

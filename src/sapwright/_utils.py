@@ -1,15 +1,14 @@
 import datetime
 import logging
+import subprocess
 import sys
+import time
 import winreg
 from pathlib import Path
 from typing import Any
 
-import psutil
 import pywintypes
 import win32com.client as win32
-from pywinauto import Application
-from pywinauto.timings import TimeoutError as PywinautoTimeoutError
 
 from sapwright.exceptions import SAPLogonError
 
@@ -48,7 +47,7 @@ def launch_saplogon(exe_path: str | Path | None = None, timeout: int = 60) -> No
     if sys.platform != "win32":
         raise NotImplementedError("Launch SAP Logon only supported on Windows")
 
-    if is_process_running(SAPLOGON_EXE):
+    if get_scripting_engine() is not None:
         logger.debug("SAP Logon is already running")
         return
 
@@ -60,42 +59,20 @@ def launch_saplogon(exe_path: str | Path | None = None, timeout: int = 60) -> No
 
     logger.debug(f"Launching SAP Logon from '{path}'")
     try:
-        process = psutil.Popen([path])
-        app = Application().connect(process=process.pid, timeout=timeout)
-        app.top_window().wait("ready", timeout=timeout)
-    except PywinautoTimeoutError as e:
-        raise TimeoutError(f"Timeout waiting for SAP Logon to become ready: {e}") from e
-    except Exception as e:
-        msg = f"Failed to connect to SAP Logon: {e}"
+        subprocess.Popen([path])
+    except OSError as e:
+        msg = f"Failed to launch SAP Logon: {e}"
         logger.error(msg)
         raise SAPLogonError(msg) from e
 
+    # The scripting engine registers in the ROT once SAP Logon is ready
+    deadline = time.monotonic() + timeout
+    while get_scripting_engine() is None:
+        if time.monotonic() > deadline:
+            raise TimeoutError("Timeout waiting for SAP Logon to become ready")
+        time.sleep(0.5)
+
     logger.debug("SAP Logon launched and ready")
-
-
-def is_process_running(process_name: str) -> bool:
-    """Checks if a process with the given name is running.
-
-    Parameters
-    ----------
-    process_name : str
-        Name of the process
-
-    Returns
-    -------
-    bool
-        True if the process is running
-
-    Example
-    -------
-    >>> is_process_running("saplogon.exe")
-    True
-    """
-    target = process_name.lower()
-    for proc in psutil.process_iter(["name"]):
-        if (proc.info["name"] or "").lower() == target:
-            return True
-    return False
 
 
 def get_saplogon_path() -> Path | None:
