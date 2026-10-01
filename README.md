@@ -60,7 +60,7 @@ Follow these steps for a smooth scripting experience:
   - `press_enter()`, `send_vkey()`, `dismiss_popups()` (repeatedly dismiss stacked popup dialogs), `title()`.
   - `close()`, `close_connection()`, session `info` (user, client, transaction, response time, round trips, etc. as a typed `SessionInfo` model).
 - **Advanced `GuiTableControl` operations**:
-  - Automatic, eagerly-cached column header map (`.headers`) mapping header text → column index, with include/exclude filtering via `get_table_headers()`.
+  - Automatic, eagerly-cached column header map (`.headers`) mapping header text → column index.
   - Indexable/iterable `GuiTableRow` (iterate cells directly).
   - `.rows`, `.columns`, `.get_cell(row, col, expected_type=...)`, `.get_absolute_row()` (stable row indexing across scroll position).
   - Row selection helpers (`select_row`, `deselect_row`, `toggle_select_row`) and column helpers (`select_all_columns`, `deselect_all_columns`, `reorder_table`).

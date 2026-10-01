@@ -264,47 +264,14 @@ class GuiTableControl(GuiComponent):
 
         self._com = self._session._com.FindById(self._control_id, False)
 
-    def get_table_headers(
-        self,
-        headers: list[str] | None = None,
-        exclude_headers: list[str] | None = None,
-    ) -> dict[str, int]:
-        """
-        Creates a mapping of table headers (lowercase by default) to header index
-
-        Parameters
-        ----------
-        headers : list[str] | None
-            List of headers to include. If None, all headers of the table are included, by default None.
-        exclude_headers : list[str] | None
-            List of headers to exclude. If None, no headers are excluded, by default None.
-        lowercase : bool, optional
-            Whether to return the lowercase headers, by default True
-
-        Returns
-        -------
-        dict[str, int]
-            Mapping of header name to header index.
-        """
-        if headers and exclude_headers:
-            raise ValueError("Cannot specify both headers and exclude_headers")
-
-        full_map: dict[str, int] = {}
+    def get_table_headers(self) -> dict[str, int]:
+        """Mapping of lowercase, stripped column titles to column index. Empty titles are skipped."""
+        headers: dict[str, int] = {}
         for i, col in enumerate(self.columns):
             title = col.title.strip().lower()
             if title:
-                full_map[title] = i
-
-        if headers:
-            whitelist = {c.lower() for c in headers}
-            return {title: idx for title, idx in full_map.items() if title in whitelist}
-
-        if exclude_headers:
-            blacklist = {c.lower() for c in exclude_headers}
-            return {
-                title: idx for title, idx in full_map.items() if title not in blacklist
-            }
-        return full_map
+                headers[title] = i
+        return headers
 
     # Aliases
     Columns = columns
