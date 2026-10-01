@@ -254,6 +254,41 @@ class GuiTableControl(GuiComponent):
 
         return expected_type(cell)
 
+    def set_cell_text(
+        self,
+        row: int,
+        column: int,
+        value: Any,
+        strip: bool = False,
+        date_format: str = "%d.%m.%Y",
+        set_focus: bool = False,
+        raise_error: bool = True,
+    ) -> None:
+        """Sets the text of a table cell. Shorthand for
+        ``get_cell(row, column).set_text(value, raise_error=True)``.
+
+        Parameters
+        ----------
+        row : int
+            Zero-based index of the visible row
+        column : int
+            Zero-based index of the column
+        value : Any
+            Value to set, see GuiComponent.set_text
+
+        Raises
+        ------
+        SAPElementNotChangeable
+            If the cell is not changeable
+        """
+        _ = self.get_cell(row, column).set_text(
+            value,
+            date_format=date_format,
+            strip=strip,
+            set_focus=set_focus,
+            raise_error=raise_error,
+        )
+
     def refresh(self):
         """Refreshes the table control. This method is useful when the table has been paginated, or scrolled, the old reference to table control com object is no longer valid. This method will refresh the table control and return the new reference to the com object."""
         if not self._session:

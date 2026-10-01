@@ -178,6 +178,10 @@ class GuiComponent:
         combobox entries are selected by text, and text longer than the field's
         max length is truncated.
 
+        Every COM property access is a cross-process round-trip, so the text is
+        written directly first; the combobox, changeable and max length checks
+        only run if that write fails.
+
         Returns
         -------
         bool
@@ -188,13 +192,6 @@ class GuiComponent:
         SAPElementNotChangeable
             If the element is not changeable and raise_error is True
         """
-        if not self.changeable:
-            msg = f"Element of type {self.type} is not changeable: {self.id}"
-            logger.warning(msg)
-            if raise_error:
-                raise SAPElementNotChangeable(msg)
-            return False
-
         if isinstance(value, (date, datetime)):
             value = value.strftime(date_format)
 
@@ -202,15 +199,28 @@ class GuiComponent:
         if strip:
             value = value.strip()
 
+        if set_focus:
+            self.set_focus()
+
+        try:
+            self._com.Text = value
+            return True
+        except Exception as e:
+            logger.debug(f"Direct text write failed, checking element: {e}")
+
         if self.type == GuiComponentType.GuiComboBox:
             return self._select_combobox_entry(value)
+
+        if not self.changeable:
+            msg = f"Element of type {self.type} is not changeable: {self.id}"
+            logger.warning(msg)
+            if raise_error:
+                raise SAPElementNotChangeable(msg)
+            return False
 
         max_length = getattr(self._com, "MaxLength", None)
         if max_length:
             value = value[:max_length]
-
-        if set_focus:
-            self.set_focus()
 
         self._com.Text = value
         return True
@@ -338,26 +348,6 @@ ComponentT = TypeVar("ComponentT", bound=GuiComponent)
 _InitT = TypeVar("_InitT", bound=GuiComponent)
 
 
-def get_com_collection_item(com_collection: Any, index: int) -> Any:
-    """Returns the COM object at the given index in the collection."""
-    try:
-        return com_collection.Item(index)
-    except Exception:
-        element_at = getattr(com_collection, "ElementAt", None)
-        if element_at is not None:
-            try:
-                return element_at(index)
-            except Exception as e:
-                logger.debug(
-                    f"Item(index) and ElementAt(index) failed: {e}, falling back to direct index access"
-                )
-        try:
-            return com_collection(index)  # default member: collection(index)
-        except Exception as e:
-            logger.error(f"Failed to get element at index {index}: {e}")
-        raise
-
-
 class GuiComponentCollection(Generic[ComponentT]):
     """The GuiComponentCollection is used for collections elements such as the Children property of containers. Each element of the collection is an extension of GuiComponent."""
 
@@ -396,7 +386,7 @@ class GuiComponentCollection(Generic[ComponentT]):
                 f"Index {index} out of range for collection of length {length}"
             )
 
-        element = get_com_collection_item(self._com, index)
+        element = self._com.Item(index)
 
         expected_type = self._expected_type
         if expected_type is None:
