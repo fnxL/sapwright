@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+from dataclasses import dataclass
 
 
-class StatusBarMsg(BaseModel):
+@dataclass
+class StatusBarMsg:
     """The status bar message"""
 
     id: str
@@ -12,7 +13,8 @@ class StatusBarMsg(BaseModel):
     is_popup: bool | None
 
 
-class SessionInfo(BaseModel):
+@dataclass
+class SessionInfo:
     """Session information"""
 
     application_server: str = ""
