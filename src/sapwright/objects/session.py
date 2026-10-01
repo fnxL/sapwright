@@ -1,8 +1,6 @@
 import logging
 from typing import Literal, overload
 
-from typing_extensions import override
-
 from sapwright.exceptions import (
     SAPElementNotFound,
     SAPElementTypeMismatch,
@@ -294,7 +292,6 @@ class GuiSession(GuiComponent):
         """Alias for close_connection"""
         self.close_connection()
 
-    @override
     def send_vkey(
         self,
         vkey: VKey | int,

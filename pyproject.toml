@@ -68,3 +68,4 @@ reportAny = false
 reportExplicitAny = false
 reportUnannotatedClassAttribute = false
 reportUnusedCallResult = false
+reportImplicitOverride = false
