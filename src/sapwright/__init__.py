@@ -2,10 +2,10 @@ import logging
 from collections.abc import Callable
 from pathlib import Path
 from types import TracebackType
-from typing import final
+from typing import Any, final
 
 from sapwright._utils import default_password_generator, launch_saplogon
-from sapwright.connection_manager import ConnectionManager
+from sapwright.connection_manager import find_connection_by_user, open_connection
 from sapwright.exceptions import SAPLoginError
 from sapwright.objects import GuiSession
 
@@ -56,7 +56,7 @@ class Sapwright:
         self._terminate_other_sessions = terminate_other_sessions
         self._exe_path = exe_path
         self._password_generator = password_generator or default_password_generator
-        self._connection_mgr = ConnectionManager()
+        self._connection: Any = None
         self._session: GuiSession | None = None
 
     def __enter__(self):
@@ -76,7 +76,10 @@ class Sapwright:
 
         When opening, connection_string takes precedence over connection_name.
         """
-        session = self._attach_existing() or self._open_new()
+        self._connection = (
+            self._find_existing_connection() or self._open_new_connection()
+        )
+        session = GuiSession(self._connection.Children(0))
         self._login(session)
         self._session = session
         return session
@@ -88,37 +91,34 @@ class Sapwright:
         connection.CloseConnection() if the command fails.
         """
         session, self._session = self._session, None
-        if session is None:
-            self._connection_mgr.close_connection()
-            return
-
+        connection, self._connection = self._connection, None
         try:
-            session.send_command("/nex")
+            if session:
+                session.send_command("/nex")
+                return
         except Exception as e:
             logger.debug(f"'/nex' failed, closing connection directly: {e}")
-            self._connection_mgr.close_connection()
+        if connection:
+            connection.CloseConnection()
 
-    def _attach_existing(self) -> GuiSession | None:
-        # find existing connections of the user
-        connection = self._connection_mgr.find_connection_by_user(
+    def _find_existing_connection(self) -> Any | None:
+        connection = find_connection_by_user(
             self._username,
             connection_string=self._connection_string,
             connection_name=self._connection_name,
         )
-        if not connection:
-            return None
+        if connection:
+            logger.debug(
+                f"Attaching to existing connection '{connection.Description}' for user: {self._username}"
+            )
+        return connection
 
-        logger.debug(
-            f"Attaching to existing connection '{connection.Description}' for user: {self._username}"
-        )
-        return GuiSession(connection.Children(0))
-
-    def _open_new(self) -> GuiSession:
+    def _open_new_connection(self) -> Any:
         logger.info(
             f"No existing connection with given connection_string or connection_name found for user: {self._username}, opening a new one"
         )
         launch_saplogon(self._exe_path)
-        return self._connection_mgr.open_connection(
+        return open_connection(
             connection_string=self._connection_string,
             connection_name=self._connection_name,
         )

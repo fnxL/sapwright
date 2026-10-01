@@ -3,7 +3,6 @@ from typing import Any
 
 from sapwright._utils import get_scripting_engine
 from sapwright.exceptions import SAPConnectionError, SAPLogonError, SAPScriptingDisabled
-from sapwright.objects import GuiSession
 
 logger = logging.getLogger(__name__)
 
@@ -25,101 +24,79 @@ def _matches(
     return _normalize(connection.Description) == _normalize(connection_name)
 
 
-class ConnectionManager:
-    def __init__(self) -> None:
-        self._connection: Any = None
+def find_connection_by_user(
+    username: str,
+    connection_string: str | None = None,
+    connection_name: str | None = None,
+) -> Any | None:
+    """Check if a connection for the specified user is already open.
 
-    def find_connection_by_user(
-        self,
-        username: str,
-        connection_string: str | None = None,
-        connection_name: str | None = None,
-    ) -> Any | None:
-        """Check if a connection for the specified user is already open.
+    Returns
+    -------
+    object or None
+        The underlying native GuiConnection COM object if a matching connection
+        has a session logged in as the user, otherwise None
 
-        Returns
-        -------
-        object or None
-            The underlying native GuiConnection COM object if a matching connection
-            has a session logged in as the user, otherwise None
+    Raises
+    ------
+    ValueError
+        If neither connection_string nor connection_name is provided
+    SAPScriptingDisabled
+        If SAP GUI Scripting is disabled by the server
+    """
+    if not connection_string and not connection_name:
+        raise ValueError("connection_string or connection_name must be provided.")
 
-        Raises
-        ------
-        ValueError
-            If neither connection_string nor connection_name is provided
-        SAPScriptingDisabled
-            If SAP GUI Scripting is disabled by the server
-        """
-        if not connection_string and not connection_name:
-            raise ValueError("connection_string or connection_name must be provided.")
-
-        application = get_scripting_engine()
-        if application is None:
-            return None
-
-        user = _normalize(username)
-        for i in range(application.Children.Count):
-            connection = application.Children(i)
-            if connection.DisabledByServer:
-                raise SAPScriptingDisabled(
-                    "SAP GUI Scripting is disabled by server. Contact your SAP basis team to enable it."
-                )
-            if not _matches(connection, connection_string, connection_name):
-                continue
-
-            sessions = connection.Children
-            for j in range(sessions.Count):
-                if _normalize(sessions(j).Info.User) == user:
-                    self._connection = connection
-                    return connection
-
+    application = get_scripting_engine()
+    if application is None:
         return None
 
-    def open_connection(
-        self,
-        connection_string: str | None = None,
-        connection_name: str | None = None,
-    ) -> GuiSession:
-        """Open a new connection and return its first session.
+    user = _normalize(username)
+    for i in range(application.Children.Count):
+        connection = application.Children(i)
+        if connection.DisabledByServer:
+            raise SAPScriptingDisabled(
+                "SAP GUI Scripting is disabled by server. Contact your SAP basis team to enable it."
+            )
+        if not _matches(connection, connection_string, connection_name):
+            continue
 
-        connection_string takes precedence over connection_name.
+        sessions = connection.Children
+        for j in range(sessions.Count):
+            if _normalize(sessions(j).Info.User) == user:
+                return connection
 
-        Raises
-        ------
-        SAPLogonError
-            If SAP Logon is not running
-        SAPConnectionError
-            If the connection could not be opened
-        """
-        application = get_scripting_engine()
-        if application is None:
-            raise SAPLogonError("SAP Logon is not running")
+    return None
 
-        try:
-            if connection_string:
-                connection = application.OpenConnectionByConnectionString(
-                    connection_string, True, True
-                )
-            else:
-                connection = application.OpenConnection(connection_name, True, True)
 
-            self._connection = connection
-            return GuiSession(connection.Children(0))
-        except Exception as e:
-            msg = f"Failed to open SAP connection: {e}"
-            logger.error(msg)
-            raise SAPConnectionError(msg) from e
+def open_connection(
+    connection_string: str | None = None,
+    connection_name: str | None = None,
+) -> Any:
+    """Open a new connection and return the native GuiConnection COM object.
 
-    def close_connection(self):
-        """
-        Closes the SAP connection including all sessions.
-        This method closes the SAP connection and all associated sessions,
-        and cleans up the internal references to the SAP GUI objects.
-        """
-        try:
-            self._connection.CloseConnection()
-            logger.debug("SAP connection closed")
-        except Exception as e:
-            logger.error(f"Error while closing connection: {e}")
+    connection_string takes precedence over connection_name.
 
-        self._connection = None
+    Raises
+    ------
+    SAPLogonError
+        If SAP Logon is not running
+    SAPConnectionError
+        If the connection could not be opened
+    """
+    application = get_scripting_engine()
+    if application is None:
+        raise SAPLogonError("SAP Logon is not running")
+
+    try:
+        if connection_string:
+            connection = application.OpenConnectionByConnectionString(
+                connection_string, True, True
+            )
+        else:
+            connection = application.OpenConnection(connection_name, True, True)
+        return connection
+    except Exception as e:
+        msg = f"Failed to open SAP connection: {e}"
+        logger.error(msg)
+        raise SAPConnectionError(msg) from e
