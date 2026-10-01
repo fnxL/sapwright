@@ -1,6 +1,5 @@
 import logging
 from collections.abc import Callable
-from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
 from typing import final
@@ -13,7 +12,6 @@ from sapwright.objects import GuiSession
 logger = logging.getLogger(__name__)
 
 
-@dataclass
 class SAPLoginScreenElements:
     client = "wnd[0]/usr/txtRSYST-MANDT"
     username = "wnd[0]/usr/txtRSYST-BNAME"
