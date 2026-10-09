@@ -1,13 +1,7 @@
-# pyright: reportImportCycles=false
-# GuiSession subclasses GuiComponent but GuiComponent.__init__ stores a typed
-# back-reference to the GuiSession that created it, so component.py <-> session.py
-# is an intentional cycle in the type graph, not an accidental coupling.
 import logging
 from collections.abc import Iterator
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar, cast, overload
-
-from typing_extensions import override
 
 from sapwright.exceptions import (
     SAPComboBoxOptionNotFound,
@@ -25,7 +19,6 @@ logger = logging.getLogger(__name__)
 class GuiComponent:
     _subtype: ClassVar[str | None] = None
 
-    @override
     def __init_subclass__(
         cls,
         subtype: str | None = None,
@@ -80,7 +73,6 @@ class GuiComponent:
             raise AttributeError(name)
         return getattr(self._com, name)
 
-    @override
     def __setattr__(self, name: str, value: Any):
         """
         Set attributes on this class instance, or delegate to the underlying COM element if the attribute does not exist on the class.
