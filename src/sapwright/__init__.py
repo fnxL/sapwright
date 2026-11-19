@@ -59,7 +59,7 @@ class Sapwright:
         self._connection: Any = None
         self._session: GuiSession | None = None
 
-    def __enter__(self):
+    def __enter__(self) -> GuiSession:
         return self.connect()
 
     def __exit__(
