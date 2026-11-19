@@ -378,7 +378,9 @@ class GuiSession(GuiComponent):
             number=sbar.MessageNumber,
             text=sbar.Text,
             type=sbar.MessageType,
-            has_longtext=sbar.MessageHasLongText,
+            has_longtext=sbar.MessageHasLongText
+            if hasattr(sbar, "MessageHasLongText")
+            else None,
             is_popup=sbar.MessageAsPopup,
         )
 

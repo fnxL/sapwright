@@ -9,7 +9,7 @@ class StatusBarMsg:
     type: str
     text: str
     number: str
-    has_longtext: int
+    has_longtext: int | None
     is_popup: bool | None
 
 
